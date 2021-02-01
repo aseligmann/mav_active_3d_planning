@@ -51,6 +51,7 @@ class EvalPlotting:
 
         # Setup
         self.eval_log_file = None
+        rospy.loginfo("Waiting eval_voxblox_node...")
         rospy.wait_for_service(self.ns_voxblox + "/evaluate")
         self.eval_voxblox_srv = rospy.ServiceProxy(self.ns_voxblox + "/evaluate", Empty)
 

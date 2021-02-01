@@ -1,6 +1,7 @@
 <launch>
   <!-- Gazebo arguments -->
   <arg name="mav_name" default="firefly"/>
+  <arg name="mav_model" default="$(find rotors_description)/urdf/mav_with_three_vi_sensor.gazebo"/>
   <arg name="gui" default="false"/>
   <arg name="verbose_gazebo" default="false"/>
 
@@ -12,32 +13,37 @@
   <arg name="verbose_voxblox" default="false"/>
     
   <!-- Unreal Routine arguments -->
-  <arg name="uecv_mode" default="fast"/>
-  <arg name="slowdown" default="0.0"/>
+  <!-- <arg name="uecv_mode" default="fast"/> -->
+  <!-- <arg name="slowdown" default="0.0"/> -->
   <arg name="delay" default="3.0"/>  
   
   <!-- Unreal Sensor arguments (ground_truth, kinect, gaussian_depth_noise)-->
-  <arg name="model_type" default="gaussian_depth_noise"/>
-  <arg name="flatten_distance" default="6.0"/>
-  <arg name="maximum_distance" default="0.0"/>
+  <!-- <arg name="model_type" default="gaussian_depth_noise"/> -->
+  <!-- <arg name="flatten_distance" default="6.0"/> -->
+  <!-- <arg name="maximum_distance" default="0.0"/> -->
   
   <!-- Odometry  arguments (random_walk, ground_truth)-->
   <arg name="use_rovio" default="false"/>
   <arg name="odom_noise_model" default="random_walk"/>
   
   <!--  Planner arguments (can use a single config or compose the planner)-->
-  <arg name="use_separate_configs" default="false"/>
+  <!-- <arg name="use_separate_configs" default="false"/> -->
   <arg name="planner_config" default="planners/example_config.yaml"/>
+  <!-- <arg name="planner_config" default="planners/reconstruction_planner.yaml"/> -->
   <arg name="verbose_planner" default="true"/>
   <arg name="visualize" default="true"/>
   
   <!--  Experiment arguments -->  
-  <arg name="experiment_config" default="CityBuilding.yaml"/>
+  <arg name="experiment_config" default="BallastTank.yaml"/>
+  <!-- <arg name="experiment_config" default="CityBuilding.yaml"/> -->
   <arg name="record_data" default="true"/>
   <arg name="record_visualization" default="true"/>
-  <arg name="data_directory" default="/home/user/Documents/Data"/> 
-  <arg name="data_frequency" default="30.0" />
-  <arg name="time_limit" default="30" />
+  <arg name="data_directory" default="/home/albert/project/data"/> 
+  <arg name="data_frequency" default="1.0" /> <!-- Hertz -->
+  <arg name="time_limit" default="30.0" /> <!-- Minutes -->
+
+
+  <arg name="pointcloud_topic" default="/$(arg mav_name)/camera_front/depth/points"/>
 
 
   <!-- *** Experiment Execution *** -->
@@ -49,7 +55,7 @@
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find unreal_cv_ros)/content/gazebo_empty.world" />
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/ballast_tank.world" />
     <arg name="debug" value="false" />
     <arg name="paused" value="true" />
     <arg name="gui" value="$(arg gui)" />
@@ -60,10 +66,10 @@
     <!-- Setup a mav -->
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="$(arg mav_name)" />
-      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="model" value="$(arg mav_model)" />
       <arg name="enable_ground_truth" value="true" />
       <arg name="enable_logging" value="false" />
-      <arg name="z" value="0" />
+      <arg name="z" value="0.5" />
     </include>
     
     <!-- MPC trajectory tracker (0.0021 sampling time needs to match odom publish rate!)-->
@@ -101,20 +107,27 @@
 
     <!-- static camera transform -->
     <node pkg="tf" type="static_transform_publisher" name="tf_camera_to_link" args="0 0 0 -0.5 0.5 -0.5 0.5 /camera_link /camera 100"/>  
+    <node pkg="tf" type="static_transform_publisher" name="tf_cam_front"     args="0.15 0.0 0.0 0.0 0.0 0.0 $(arg mav_name)/base_link $(arg mav_name)/camera_front_link 1" />
+    <node pkg="tf" type="static_transform_publisher" name="tf_cam_up"        args="0.0 0.0 0.10 0.0 -1.57 0.0 $(arg mav_name)/base_link $(arg mav_name)/camera_up_link 1" />
+    <node pkg="tf" type="static_transform_publisher" name="tf_cam_down"      args="0.0 0.0 -0.10 0.0 1.57 0.0 $(arg mav_name)/base_link $(arg mav_name)/camera_down_link 1" />
+    <node pkg="tf" type="static_transform_publisher" name="tf_cam_front_opt" args="0.0 0.0 0.0 -1.57 0.0 -1.57 $(arg mav_name)/camera_front_link $(arg mav_name)/camera_front_optical_center_link 1" />
+    <node pkg="tf" type="static_transform_publisher" name="tf_cam_up_opt"    args="0.0 0.0 0.0 -1.57 0.0 -1.57 $(arg mav_name)/camera_up_link $(arg mav_name)/camera_up_optical_center_link 1" />
+    <node pkg="tf" type="static_transform_publisher" name="tf_cam_down_opt"  args="0.0 0.0 0.0 -1.57 0.0 -1.57 $(arg mav_name)/camera_down_link $(arg mav_name)/camera_down_optical_center_link 1" />
+  
   </group>
 
   <group ns="unreal">
     <!-- Unreal vision client -->
-    <node name="unreal_ros_client" pkg="unreal_cv_ros" type="unreal_ros_client.py" required="true" output="screen">
+    <!-- <node name="unreal_ros_client" pkg="unreal_cv_ros" type="unreal_ros_client.py" required="true" output="screen">
       <param name="mode" value="$(arg uecv_mode)"/>
       <param name="publish_tf" value="false"/>
       <param name="collision_on" value="true"/>
       <param name="slowdown" value="$(arg slowdown)"/>
       <remap from="odometry" to="/$(arg mav_name)/ground_truth/odometry" />
-    </node>
+    </node> -->
     
     <!-- Unreal sensor model -->
-    <node name="unreal_sensor_model" pkg="unreal_cv_ros" type="sensor_model.py" output="screen">
+    <!-- <node name="unreal_sensor_model" pkg="unreal_cv_ros" type="sensor_model.py" output="screen">
       <param name="camera_params_ns" value="/unreal/unreal_ros_client/camera_params"/>
       <param name="flatten_distance" value="$(arg flatten_distance)"/>
       <param name="model_type" value="$(arg model_type)" />
@@ -123,7 +136,7 @@
       <param name="k_mu_2" value="0.0024" />
       <param name="k_sigma_2" value="0.0024" />
       <remap from="ue_sensor_raw" to="unreal_ros_client/ue_sensor_raw" />
-    </node>
+    </node> -->
 
     <!-- Simulation manager for launching the MAV and monitoring -->
     <node name="simulation_manager" pkg="unreal_cv_ros" type="simulation_manager.py" output="screen">
@@ -131,19 +144,20 @@
       <param name="ns_gazebo" value="/gazebo" />
       <param name="monitor" value="true" />
       <param name="horizon" value="20" />
+      <rosparam param="initial_position">[0, 0, 0.5]</rosparam>
       <remap from="ue_raw_in" to="unreal_ros_client/ue_sensor_raw" />
-      <remap from="ue_out_in" to="unreal_sensor_model/ue_sensor_out" />
+      <remap from="ue_out_in" to="$(arg pointcloud_topic)" />
     </node>
     
     <!-- Experiment launcher, data generation-->
     <node name="eval_data_node" pkg="active_3d_planning_app_reconstruction" type="eval_data_node.py" output="screen" required="true">
-      <remap from="ue_out_in" to="unreal_sensor_model/ue_sensor_out" />
+      <remap from="ue_out_in" to="$(arg pointcloud_topic)" />
       <remap from="unreal_simulation_ready" to="simulation_manager/simulation_ready" />
       <remap from="collision" to="unreal_ros_client/collision" />
       <param name="ns_planner" value="/planner/planner_node" />
       <param name="ns_voxblox" value="/planner/voxblox_node" />
       <param name="delay" value="$(arg delay)" />
-      <param name="startup_timeout" value="30.0" />
+      <param name="startup_timeout" value="180.0" />
       <param name="evaluate" value="$(arg record_data)" />
       <param name="eval_directory" value="$(arg data_directory)" />
       <param name="eval_frequency" value="$(arg data_frequency)" />
@@ -158,7 +172,7 @@
   <group ns="planner">
     <!-- Voxblox -->
     <node name="voxblox_node" pkg="voxblox_ros" type="esdf_server" output="screen" args="-alsologtostderr">
-      <remap from="pointcloud" to="/unreal/unreal_sensor_model/ue_sensor_out"/>
+      <remap from="pointcloud" to="$(arg pointcloud_topic)"/>
       <remap from="transform" to="/$(arg mav_name)/rovio/transform" if="$(arg use_rovio)"/>
       <rosparam command="load" file="$(find active_3d_planning_app_reconstruction)/cfg/voxblox/transforms.yaml" if="$(arg use_rovio)"/> 
       <param name="use_tf_transforms" value="$(eval arg('use_rovio') == false)"/>
