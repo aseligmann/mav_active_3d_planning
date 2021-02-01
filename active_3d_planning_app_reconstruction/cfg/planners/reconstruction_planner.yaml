@@ -22,12 +22,12 @@ system_constraints:
   a_max: 1.0
   yaw_rate_max: 1.6
   yaw_accel_max: 1.6
-  collision_radius: 1.0
+  collision_radius: 0.5
 
 trajectory_generator:
   collision_optimistic: false
   bounding_volume_args: "/map_bounding_volume"
-  clearing_radius: 0.0
+  clearing_radius: 0.75
 
   type: "RRTStar"
   all_semgents_feasible: false
