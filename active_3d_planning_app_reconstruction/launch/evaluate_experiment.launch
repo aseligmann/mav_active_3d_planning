@@ -1,7 +1,7 @@
 <launch>
   <!-- Data source Data, -->
   <arg name="target_directory" default="/home/albert/project/data" />
-  <arg name="gt_file_path" default="/home/albert/project/data/ground_truth/ballast_tank_no_pipes.ply"/>
+  <arg name="gt_file_path" default="/home/albert/project/data/ground_truth/ballast_tank_no_pipes_2x.ply"/>
   <arg name="experiment_config" default="BallastTank.yaml"/>
   <arg name="method" default="recent"/>
   

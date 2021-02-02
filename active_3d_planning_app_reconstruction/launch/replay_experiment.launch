@@ -1,12 +1,12 @@
 <launch>
   <arg name="data_directory" default="/home/albert/project/data" />
-  <arg name="dir" default="tmp_bags" />
+  <arg name="dir" default="20210201_211252/visualisation.bag" />
   <arg name="rate" default="5"/>
 
 
 
 	<!-- Play Rosbag and RVIZ (visualization) -->
-	<node pkg="rosbag" type="play" name="player" output="screen" args="-r $(arg rate) $(arg data_directory)/$(arg dir)/tmp_bag_2021-02-01-21-13-55.bag"/>
+	<node pkg="rosbag" type="play" name="player" output="screen" args="-r $(arg rate) $(arg data_directory)/$(arg dir)"/>
 
 	<node type="rviz" name="rviz_replay" pkg="rviz" args="-d $(find active_3d_planning_app_reconstruction)/cfg/experiments/experiment_visualization.rviz"/>
 </launch>
