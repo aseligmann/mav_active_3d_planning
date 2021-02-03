@@ -67,7 +67,12 @@ trajectory_evaluator:
     type: "IterativeRayCaster"
     sampling_time: 0.0
     ray_length: 5.0
-    focal_length: 320.0
+    # res_x = 640 px
+    # res_y = 480 px
+    # fov_x = 2.0 rad
+    # fov_y = 1.5 rad
+    # focallength = 1/2 * res_x * 1/(tan(fov_x/2)) = 205.475785699
+    focal_length: 205.475785699
     resolution_x: 640
     resolution_y: 480
     downsampling_factor: 3.0
