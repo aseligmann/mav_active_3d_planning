@@ -30,7 +30,7 @@ namespace active_3d_planning {
             trajectory_vis_pub_ = nh_.advertise<visualization_msgs::MarkerArray>(
                     "trajectory_visualization", 100);
             odom_sub_ = nh_.subscribe("odometry", 1, &RosPlanner::odomCallback, this);
-            get_cpu_time_srv_ = nh_private_.advertiseService("get_cpu_time", &RosPlanner::cpuSrvCallback, this);
+            get_cpu_time_srv_ = nh_private_.advertiseService("/planner_evaluation/get_cpu_time", &RosPlanner::cpuSrvCallback, this);
 
             // Finish
             ROS_INFO_STREAM("\n******************** Initialized Planner ********************\n"
@@ -81,7 +81,7 @@ namespace active_3d_planning {
         void RosPlanner::planningLoop() {
             // This is the main loop, spinning is managed explicitely for efficiency
             ROS_INFO("\n******************** Planner is now Running ********************\n");
-            run_srv_ = nh_private_.advertiseService("toggle_running", &RosPlanner::runSrvCallback, this);
+            run_srv_ = nh_private_.advertiseService("/planner_evaluation/toggle_running", &RosPlanner::runSrvCallback, this);
             running_ = true;
             std::clock_t timer;
             while (::ros::ok()) {

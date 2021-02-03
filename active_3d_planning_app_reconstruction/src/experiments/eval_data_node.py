@@ -64,7 +64,7 @@ class EvalData:
             # Subscribers, Services
             self.ue_out_sub = rospy.Subscriber("ue_out_in", PointCloud2, self.ue_out_callback, queue_size=10)
             self.collision_sub = rospy.Subscriber("collision", String, self.collision_callback, queue_size=10)
-            self.cpu_time_srv = rospy.ServiceProxy(self.ns_planner + "/get_cpu_time", SetBool)
+            self.cpu_time_srv = rospy.ServiceProxy("/planner_evaluation/get_cpu_time", SetBool)
 
             # Finish
             self.writelog("Data folder created at '%s'." % self.eval_directory)
@@ -92,19 +92,19 @@ class EvalData:
         rospy.loginfo("Waiting for planner to be ready...")
         if self.startup_timeout > 0.0:
             try:
-                rospy.wait_for_service(self.ns_planner + "/toggle_running", self.startup_timeout)
+                rospy.wait_for_service("/planner_evaluation/toggle_running", self.startup_timeout)
             except rospy.ROSException:
                 self.stop_experiment("Planner startup failed (timeout after " + str(self.startup_timeout) + "s).")
                 return
         else:
-            rospy.wait_for_service(self.ns_planner + "/toggle_running")
+            rospy.wait_for_service("/planner_evaluation/toggle_running")
 
         if self.planner_delay > 0:
             rospy.loginfo("Waiting for planner to be ready... done. Launch in %d seconds.", self.planner_delay)
             rospy.sleep(self.planner_delay)
         else:
             rospy.loginfo("Waiting for planner to be ready... done.")
-        run_planner_srv = rospy.ServiceProxy(self.ns_planner + "/toggle_running", SetBool)
+        run_planner_srv = rospy.ServiceProxy("/planner_evaluation/toggle_running", SetBool)
         run_planner_srv(True)
 
         # Setup first measurements
