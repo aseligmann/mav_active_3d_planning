@@ -3,7 +3,7 @@
 # Bounding boxes (in initialization frame, relative to PlayerStart)
 map_bounding_volume:
   x_min: -3.0
-  x_max: 35.0
+  x_max: 40.0
   y_min: -2.5
   y_max: 2.5
   z_min: -0.1
@@ -11,7 +11,7 @@ map_bounding_volume:
 
 target_bounding_volume:
   x_min: -3.0
-  x_max: 35.0
+  x_max: 40.0
   y_min: -2.5
   y_max: 2.5
   z_min: -0.1
