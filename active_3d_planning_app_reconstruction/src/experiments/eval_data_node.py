@@ -14,6 +14,7 @@ import datetime
 import os
 import re
 import subprocess
+import shutil
 
 
 class EvalData:
@@ -163,6 +164,7 @@ class EvalData:
 
     def eval_finish(self):
         self.eval_data_file.close()
+        shutil.copyfile(os.path.join(self.eval_directory, "voxblox_data.csv"), os.path.join(self.eval_directory, "voxblox_data.csvBAK"))
         map_path = os.path.join(self.eval_directory, "voxblox_maps")
         n_maps = len([f for f in os.listdir(map_path) if os.path.isfile(os.path.join(map_path, f))])
         self.writelog("Finished the simulation, %d/%d maps created." % (n_maps, self.eval_n_maps))
